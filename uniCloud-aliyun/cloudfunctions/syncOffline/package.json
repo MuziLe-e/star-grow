@@ -1,0 +1,10 @@
+{
+  "name": "syncOffline",
+  "version": "1.0.0",
+  "description": "离线数据同步",
+  "main": "index.js",
+  "cloudfunction-config": {
+    "memorySize": 512,
+    "timeout": 30
+  }
+}

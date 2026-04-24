@@ -1,0 +1,10 @@
+{
+  "name": "checkin",
+  "version": "1.0.0",
+  "description": "打卡",
+  "main": "index.js",
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 15
+  }
+}

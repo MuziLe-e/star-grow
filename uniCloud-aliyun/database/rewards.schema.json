@@ -1,0 +1,52 @@
+{
+  "bsonType": "object",
+  "required": ["title", "points_cost", "category"],
+  "permission": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": true
+  },
+  "properties": {
+    "_id": {
+      "description": "ID"
+    },
+    "title": {
+      "bsonType": "string",
+      "description": "奖励名称"
+    },
+    "description": {
+      "bsonType": "string",
+      "description": "奖励描述"
+    },
+    "icon": {
+      "bsonType": "string",
+      "description": "图标"
+    },
+    "points_cost": {
+      "bsonType": "int",
+      "description": "消耗积分"
+    },
+    "category": {
+      "bsonType": "string",
+      "description": "分类: experience / material"
+    },
+    "status": {
+      "bsonType": "string",
+      "description": "状态: active / archived",
+      "defaultValue": "active"
+    },
+    "stock": {
+      "bsonType": "int",
+      "description": "库存，-1表示无限"
+    },
+    "family_id": {
+      "bsonType": "string",
+      "description": "家庭ID"
+    },
+    "created_at": {
+      "bsonType": "number",
+      "description": "创建时间戳"
+    }
+  }
+}

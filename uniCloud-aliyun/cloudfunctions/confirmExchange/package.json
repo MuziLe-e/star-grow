@@ -1,0 +1,10 @@
+{
+  "name": "confirmExchange",
+  "version": "1.0.0",
+  "description": "确认/取消兑换",
+  "main": "index.js",
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 10
+  }
+}

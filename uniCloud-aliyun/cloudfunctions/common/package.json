@@ -1,0 +1,6 @@
+{
+  "name": "common",
+  "version": "1.0.0",
+  "description": "公共模块",
+  "main": "index.js"
+}

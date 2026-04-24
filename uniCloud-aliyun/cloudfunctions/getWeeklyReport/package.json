@@ -1,0 +1,10 @@
+{
+  "name": "getWeeklyReport",
+  "version": "1.0.0",
+  "description": "获取周报",
+  "main": "index.js",
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 15
+  }
+}

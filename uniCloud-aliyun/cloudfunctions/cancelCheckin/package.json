@@ -1,0 +1,10 @@
+{
+  "name": "cancelCheckin",
+  "version": "1.0.0",
+  "description": "撤销打卡",
+  "main": "index.js",
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 10
+  }
+}

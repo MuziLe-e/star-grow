@@ -1,0 +1,55 @@
+{
+  "bsonType": "object",
+  "required": ["reward_id", "reward_title", "child_id", "points_spent"],
+  "permission": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": false
+  },
+  "properties": {
+    "_id": {
+      "description": "ID"
+    },
+    "reward_id": {
+      "bsonType": "string",
+      "description": "奖励ID"
+    },
+    "reward_title": {
+      "bsonType": "string",
+      "description": "奖励名称"
+    },
+    "reward_icon": {
+      "bsonType": "string",
+      "description": "奖励图标"
+    },
+    "child_id": {
+      "bsonType": "string",
+      "description": "孩子成员ID"
+    },
+    "family_id": {
+      "bsonType": "string",
+      "description": "家庭ID，用于多用户数据隔离"
+    },
+    "points_spent": {
+      "bsonType": "int",
+      "description": "消耗的积分"
+    },
+    "status": {
+      "bsonType": "string",
+      "description": "状态: pending / confirmed / cancelled"
+    },
+    "parent_note": {
+      "bsonType": "string",
+      "description": "家长备注"
+    },
+    "confirmed_at": {
+      "bsonType": "number",
+      "description": "确认时间戳"
+    },
+    "created_at": {
+      "bsonType": "number",
+      "description": "创建时间戳"
+    }
+  }
+}

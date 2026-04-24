@@ -1,0 +1,10 @@
+{
+  "name": "getCheckins",
+  "version": "1.0.0",
+  "description": "获取打卡记录",
+  "main": "index.js",
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 10
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "bsonType": "object",
+  "required": ["title", "family_id", "points_per_check", "category"],
+  "permission": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": true
+  },
+  "properties": {
+    "_id": {
+      "description": "ID"
+    },
+    "title": {
+      "bsonType": "string",
+      "description": "计划名称"
+    },
+    "description": {
+      "bsonType": "string",
+      "description": "计划描述"
+    },
+    "family_id": {
+      "bsonType": "string",
+      "description": "家庭ID"
+    },
+    "points_per_check": {
+      "bsonType": "int",
+      "description": "每次打卡积分",
+      "defaultValue": 10
+    },
+    "category": {
+      "bsonType": "string",
+      "description": "分类: study / life / exercise / other"
+    },
+    "icon": {
+      "bsonType": "string",
+      "description": "图标"
+    },
+    "status": {
+      "bsonType": "string",
+      "description": "状态: active / archived",
+      "defaultValue": "active"
+    },
+    "created_at": {
+      "bsonType": "number",
+      "description": "创建时间戳"
+    }
+  }
+}

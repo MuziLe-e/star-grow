@@ -1,0 +1,39 @@
+{
+  "bsonType": "object",
+  "required": ["child_id", "badge_type", "title"],
+  "permission": {
+    "read": true,
+    "create": true,
+    "update": false,
+    "delete": false
+  },
+  "properties": {
+    "_id": {
+      "description": "ID"
+    },
+    "child_id": {
+      "bsonType": "string",
+      "description": "孩子成员ID"
+    },
+    "badge_type": {
+      "bsonType": "string",
+      "description": "勋章类型"
+    },
+    "title": {
+      "bsonType": "string",
+      "description": "勋章标题"
+    },
+    "icon": {
+      "bsonType": "string",
+      "description": "勋章图标"
+    },
+    "desc": {
+      "bsonType": "string",
+      "description": "勋章描述"
+    },
+    "unlocked_at": {
+      "bsonType": "number",
+      "description": "解锁时间戳"
+    }
+  }
+}

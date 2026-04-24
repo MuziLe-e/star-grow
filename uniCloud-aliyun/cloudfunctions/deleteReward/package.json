@@ -1,0 +1,10 @@
+{
+  "name": "deleteReward",
+  "version": "1.0.0",
+  "description": "删除奖励",
+  "main": "index.js",
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 10
+  }
+}

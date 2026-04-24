@@ -1,0 +1,10 @@
+{
+  "name": "savePlan",
+  "version": "1.0.0",
+  "description": "保存计划（新增/更新）",
+  "main": "index.js",
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 10
+  }
+}

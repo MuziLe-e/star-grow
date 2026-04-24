@@ -1,0 +1,55 @@
+{
+  "pages": [
+    { "path": "pages/login/index", "style": { "navigationBarTitleText": "欢迎", "navigationStyle": "custom" } },
+    { "path": "pages/index/index", "style": { "navigationBarTitleText": "今日打卡", "navigationStyle": "custom" } },
+    { "path": "pages/plan/list", "style": { "navigationBarTitleText": "我的计划" } },
+    { "path": "pages/plan/edit", "style": { "navigationBarTitleText": "编辑计划" } },
+    { "path": "pages/points/overview", "style": { "navigationBarTitleText": "我的积分" } },
+    { "path": "pages/points/history", "style": { "navigationBarTitleText": "积分明细" } },
+    { "path": "pages/reward/shop", "style": { "navigationBarTitleText": "奖励商店" } },
+    { "path": "pages/reward/manage", "style": { "navigationBarTitleText": "奖励管理" } },
+    { "path": "pages/reward/records", "style": { "navigationBarTitleText": "兑换记录" } },
+    { "path": "pages/badge/wall", "style": { "navigationBarTitleText": "勋章墙" } },
+    { "path": "pages/report/weekly", "style": { "navigationBarTitleText": "本周周报" } },
+    { "path": "pages/guide/index", "style": { "navigationBarTitleText": "家长指南" } },
+    { "path": "pages/settings/index", "style": { "navigationBarTitleText": "设置" } }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "星星养成",
+    "navigationBarBackgroundColor": "#FFF5E6",
+    "backgroundColor": "#FFF5E6"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#FF6B6B",
+    "borderStyle": "white",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "打卡",
+        "iconPath": "static/tab-checkin.png",
+        "selectedIconPath": "static/tab-checkin-active.png"
+      },
+      {
+        "pagePath": "pages/points/overview",
+        "text": "积分",
+        "iconPath": "static/tab-points.png",
+        "selectedIconPath": "static/tab-points-active.png"
+      },
+      {
+        "pagePath": "pages/badge/wall",
+        "text": "勋章",
+        "iconPath": "static/tab-badge.png",
+        "selectedIconPath": "static/tab-badge-active.png"
+      },
+      {
+        "pagePath": "pages/settings/index",
+        "text": "我的",
+        "iconPath": "static/tab-me.png",
+        "selectedIconPath": "static/tab-me-active.png"
+      }
+    ]
+  }
+}

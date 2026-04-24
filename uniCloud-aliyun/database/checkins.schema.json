@@ -1,0 +1,51 @@
+{
+  "bsonType": "object",
+  "required": ["plan_id", "child_id", "date"],
+  "permission": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": true
+  },
+  "properties": {
+    "_id": {
+      "description": "ID"
+    },
+    "plan_id": {
+      "bsonType": "string",
+      "description": "计划ID"
+    },
+    "child_id": {
+      "bsonType": "string",
+      "description": "孩子成员ID"
+    },
+    "date": {
+      "bsonType": "string",
+      "description": "打卡日期 YYYY-MM-DD"
+    },
+    "checked_by": {
+      "bsonType": "string",
+      "description": "打卡人: self / parent"
+    },
+    "feeling": {
+      "bsonType": "string",
+      "description": "感受"
+    },
+    "points_earned": {
+      "bsonType": "int",
+      "description": "获得的积分"
+    },
+    "bonus_points": {
+      "bsonType": "int",
+      "description": "加成积分"
+    },
+    "bonus_type": {
+      "bsonType": "string",
+      "description": "加成类型"
+    },
+    "created_at": {
+      "bsonType": "number",
+      "description": "创建时间戳"
+    }
+  }
+}
