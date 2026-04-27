@@ -3,10 +3,18 @@
 
 exports.main = async (event, context) => {
   const db = uniCloud.database()
-  const { member_id } = event
+  const { member_id, family_id } = event
 
+  // 获取成员信息并校验权限
   const res = await db.collection('members').doc(member_id).get()
   const member = res.data[0] || res.data
+  
+  // 如果有 family_id，校验用户属于该家庭
+  if (family_id && member) {
+    if (member.family_id !== family_id) {
+      return { success: false, error: '无权查看该用户的积分' }
+    }
+  }
 
   // 构建积分明细：从 checkins 获取获得记录
   const history = []

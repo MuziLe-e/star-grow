@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { callFunction } from '../utils/api.js'
+import { useUserStore } from './user.js'
 
 const get = (k) => uni.getStorageSync(k)
 const set = (k, v) => uni.setStorageSync(k, v)
@@ -14,7 +15,10 @@ export const usePointsStore = defineStore('points', () => {
   // 从云端获取最新积分数据
   async function fetchPoints(memberId) {
     try {
-      const res = await callFunction('getPoints', { member_id: memberId })
+      const res = await callFunction('getPoints', { 
+        member_id: memberId,
+        family_id: useUserStore().familyId  // 添加 family_id 用于云端权限校验
+      })
       if (res.data) {
         current.value = res.data.current_points || 0
         total.value = res.data.total_points || 0

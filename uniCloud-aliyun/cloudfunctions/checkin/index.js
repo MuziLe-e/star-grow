@@ -4,11 +4,29 @@ const { getStreak, getStreakBonus, checkBadgesForCheckin } = require('./badge-en
 
 exports.main = async (event, context) => {
   const db = uniCloud.database()
-  const { plan_id, child_id, date, checked_by, feeling } = event
+  const { plan_id, child_id, date, checked_by, feeling, family_id } = event
 
-  // 获取计划信息
+  // 获取计划信息并校验权限
   const planRes = await db.collection('plans').doc(plan_id).get()
   const plan = planRes.data[0] || planRes.data
+  if (!plan) {
+    return { success: false, error: '计划不存在' }
+  }
+  
+  // 校验计划属于该家庭，防止越权打卡
+  if (family_id && plan.family_id !== family_id) {
+    return { success: false, error: '无权操作该计划' }
+  }
+  
+  // 校验用户属于该家庭
+  if (family_id) {
+    const memberRes = await db.collection('members').doc(child_id).get()
+    const member = memberRes.data[0] || memberRes.data
+    if (!member || member.family_id !== family_id) {
+      return { success: false, error: '无权操作该用户' }
+    }
+  }
+  
   const basePoints = plan ? (plan.points_per_check || 10) : 10
 
   // 检查是否已打卡

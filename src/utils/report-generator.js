@@ -3,6 +3,7 @@
  * 每周汇总孩子打卡数据生成报告
  */
 import { callFunction } from './api.js'
+import { useUserStore } from '../stores/user.js'
 
 // 家长指南 - 按周阶段
 const PARENT_GUIDES = {
@@ -47,6 +48,7 @@ export async function generateWeeklyReport(childId, weekStart) {
   const result = await callFunction('getCheckins', {
     child_id: childId,
     week_start: weekStart,
+    family_id: useUserStore().familyId,  // 添加 family_id 用于云端权限校验
   })
 
   const checkins = result.data || []

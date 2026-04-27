@@ -67,6 +67,10 @@
         <text>🔑 {{ userStore.hasParentPassword ? '修改家长密码' : '设置家长密码' }}</text>
         <text class="arrow">›</text>
       </view>
+      <view class="menu-item" @click="showInviteCode">
+        <text>🏠 家庭邀请码</text>
+        <text class="arrow">›</text>
+      </view>
     </view>
 
     <view class="btn-logout" @click="handleLogout">
@@ -140,6 +144,27 @@
         <text class="error-text" v-if="pwdError">{{ pwdError }}</text>
       </view>
     </view>
+
+    <!-- 邀请码弹窗 -->
+    <view class="modal-mask" v-if="showInviteCodeModal" @click="showInviteCodeModal = false">
+      <view class="modal-box" @click.stop>
+        <text class="modal-title">🏠 家庭邀请码</text>
+        <text class="modal-desc">将此邀请码给孩子，让他们加入你的家庭</text>
+        <view class="invite-code-display">
+          <text class="invite-code-text">{{ inviteCode }}</text>
+        </view>
+        <view class="modal-btn-row">
+          <view class="modal-btn full" @click="copyInviteCode">
+            <text>📋 复制邀请码</text>
+          </view>
+        </view>
+        <view class="modal-btn-row" style="margin-top: 10px;">
+          <view class="modal-btn full cancel" @click="showInviteCodeModal = false">
+            <text>关闭</text>
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -149,6 +174,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '../../stores/user.js'
 import { usePointsStore } from '../../stores/points.js'
 import { useOfflineStore } from '../../stores/offline.js'
+import { callFunction } from '../../utils/api.js'
 
 const userStore = useUserStore()
 const pointsStore = usePointsStore()
@@ -163,6 +189,9 @@ const oldPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const pwdError = ref('')
+
+const showInviteCodeModal = ref(false)
+const inviteCode = ref('')
 
 onShow(() => {
   offlineStore.refreshCount()
@@ -263,6 +292,48 @@ function handleLogout() {
     }
   })
 }
+
+async function showInviteCode() {
+  console.log('=== 开始获取邀请码 ===')
+  console.log('当前 familyId:', userStore.familyId)
+  
+  if (!userStore.familyId) {
+    uni.showToast({ title: '未找到家庭信息，请重新登录', icon: 'none' })
+    return
+  }
+  
+  try {
+    uni.showLoading({ title: '加载中...' })
+    const res = await callFunction('getInviteCode', {
+      family_id: userStore.familyId
+    })
+    
+    console.log('云函数返回:', res)
+    
+    if (res.success) {
+      inviteCode.value = res.data.invite_code
+      console.log('邀请码:', inviteCode.value)
+      showInviteCodeModal.value = true
+    } else {
+      console.error('获取邀请码失败:', res.error)
+      uni.showToast({ title: res.error || '获取邀请码失败', icon: 'none' })
+    }
+  } catch (e) {
+    console.error('获取邀请码异常:', e)
+    uni.showToast({ title: '获取邀请码失败: ' + (e.message || '未知错误'), icon: 'none', duration: 3000 })
+  } finally {
+    uni.hideLoading()
+  }
+}
+
+function copyInviteCode() {
+  uni.setClipboardData({
+    data: inviteCode.value,
+    success: () => {
+      uni.showToast({ title: '已复制到剪贴板', icon: 'success' })
+    }
+  })
+}
 </script>
 
 <style scoped>
@@ -330,5 +401,33 @@ function handleLogout() {
 .modal-btn.half { flex: 1; text-align: center; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: bold; }
 .modal-btn.half.confirm { background: #FF6B6B; color: #fff; }
 .modal-btn.half.cancel { background: #f5f5f5; color: #999; }
+.modal-btn.full { 
+  flex: 1; 
+  text-align: center; 
+  padding: 12px; 
+  border-radius: 12px; 
+  font-size: 15px; 
+  font-weight: bold; 
+  background: #FF6B6B; 
+  color: #fff; 
+}
+.modal-btn.full.cancel { background: #f5f5f5; color: #999; }
 .error-text { font-size: 12px; color: #FF4D4F; text-align: center; display: block; margin-top: 8px; }
+
+/* 邀请码显示 */
+.invite-code-display {
+  background: linear-gradient(135deg, #FFE8D6, #FFF0E6);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  text-align: center;
+  border: 2px dashed #FF6B6B;
+}
+.invite-code-text {
+  font-size: 32px;
+  font-weight: bold;
+  color: #FF6B6B;
+  letter-spacing: 8px;
+  font-family: monospace;
+}
 </style>

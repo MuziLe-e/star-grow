@@ -3,7 +3,16 @@
 
 exports.main = async (event, context) => {
   const db = uniCloud.database()
-  const { child_id, date, week_start } = event
+  const { child_id, date, week_start, family_id } = event
+
+  // 如果有 family_id，校验用户属于该家庭
+  if (family_id && child_id) {
+    const memberRes = await db.collection('members').doc(child_id).get()
+    const member = memberRes.data[0] || memberRes.data
+    if (!member || member.family_id !== family_id) {
+      return { success: false, error: '无权查看该用户的打卡记录' }
+    }
+  }
 
   let query = { child_id }
   if (date) query.date = date

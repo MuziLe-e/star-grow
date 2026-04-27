@@ -1,0 +1,28 @@
+{
+  "bsonType": "object",
+  "required": ["invite_code", "status"],
+  "permission": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": false
+  },
+  "properties": {
+    "_id": {
+      "description": "家庭ID"
+    },
+    "invite_code": {
+      "bsonType": "string",
+      "description": "6位数字邀请码"
+    },
+    "status": {
+      "bsonType": "string",
+      "description": "状态: active / disabled",
+      "enum": ["active", "disabled"]
+    },
+    "created_at": {
+      "bsonType": "int",
+      "description": "创建时间"
+    }
+  }
+}

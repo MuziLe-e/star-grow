@@ -5,16 +5,30 @@ exports.main = async (event, context) => {
   const db = uniCloud.database()
   const { reward_id, child_id, family_id } = event
 
-  // 获取奖励信息
+  // 校验 family_id 必须存在
+  if (!family_id) {
+    return { success: false, error: '缺少 family_id 参数' }
+  }
+
+  // 获取奖励信息并校验权限
   const rewardRes = await db.collection('rewards').doc(reward_id).get()
   const reward = rewardRes.data[0] || rewardRes.data
   if (!reward) {
     return { success: false, error: '奖励不存在' }
   }
+  
+  // 校验奖励属于该家庭，防止越权兑换
+  if (reward.family_id !== family_id) {
+    return { success: false, error: '无权兑换该奖励' }
+  }
 
-  // 获取成员积分
+  // 获取成员积分并校验权限
   const memberRes = await db.collection('members').doc(child_id).get()
   const member = memberRes.data[0] || memberRes.data
+  if (!member || member.family_id !== family_id) {
+    return { success: false, error: '无权操作该用户' }
+  }
+  
   const currentPoints = member ? (member.current_points || 0) : 0
 
   if (currentPoints < reward.points_cost) {

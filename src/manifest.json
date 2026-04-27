@@ -1,7 +1,7 @@
 {
-    "name" : "星星养成",
-    "appid" : "__UNI__STAR_GROW",
-    "description" : "儿童习惯养成打卡小程序",
+    "name" : "",
+    "appid" : "__UNI__2398A3D",
+    "description" : "",
     "versionName" : "1.0.0",
     "versionCode" : "100",
     "transformPx" : false,
@@ -65,13 +65,13 @@
     "mp-toutiao" : {
         "usingComponents" : true
     },
-    "uniStatistics": {
-        "enable": false
+    "uniStatistics" : {
+        "enable" : false
     },
     "vueVersion" : "3",
-    "uniCloud": {
-        "vendor": "aliyun",
-        "dcloudAppId": "__UNI__STAR_GROW",
-        "spaceId": "mp-8799b3f0-3727-4556-8530-5eb7adfefce9"
+    "uniCloud" : {
+        "vendor" : "aliyun",
+        "dcloudAppId" : "__UNI__STAR_GROW",
+        "spaceId" : "mp-8799b3f0-3727-4556-8530-5eb7adfefce9"
     }
 }

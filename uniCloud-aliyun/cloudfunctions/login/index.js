@@ -8,9 +8,35 @@ async function isOpenIdInWhitelist(db, openId) {
   return res.data && res.data.length > 0
 }
 
+// 生成6位数字邀请码（确保唯一性）
+async function generateUniqueInviteCode(db) {
+  let inviteCode
+  let isUnique = false
+  let attempts = 0
+  const maxAttempts = 10
+
+  while (!isUnique && attempts < maxAttempts) {
+    inviteCode = Math.floor(100000 + Math.random() * 900000).toString()
+    
+    // 检查是否已存在
+    const existing = await db.collection('families').where({ invite_code: inviteCode }).get()
+    if (!existing.data || existing.data.length === 0) {
+      isUnique = true
+    }
+    attempts++
+  }
+
+  if (!isUnique) {
+    // 如果多次尝试都重复，使用时间戳后6位作为备选方案
+    inviteCode = String(Date.now()).slice(-6)
+  }
+
+  return inviteCode
+}
+
 exports.main = async (event, context) => {
   const db = uniCloud.database()
-  const { code, nickname, role, memberId, avatarUrl } = event
+  const { code, nickname, role, memberId, avatarUrl, inviteCode } = event
 
   let openId = ''
 
@@ -35,8 +61,8 @@ exports.main = async (event, context) => {
           {
             method: 'GET',
             data: {
-              appid: 'wx627a9b9f513b8a4d',
-              secret: '0b87393f0b2332e072d1d14e0c2aa112', // 需要在 uniCloud 控制台配置
+              appid: process.env.WECHAT_APPID || 'wx627a9b9f513b8a4d',
+              secret: process.env.WECHAT_SECRET, // 必须在 uniCloud 控制台配置环境变量
               js_code: code,
               grant_type: 'authorization_code'
             },
@@ -54,6 +80,7 @@ exports.main = async (event, context) => {
   }
 
   // 白名单校验：审核期间暂时放开，审核通过后再开启
+  // 注意：正式上线前必须开启此校验！
   // if (openId) {
   //   const allowed = await isOpenIdInWhitelist(db, openId)
   //   if (!allowed) {
@@ -97,8 +124,34 @@ exports.main = async (event, context) => {
   }
 
   if (!member) {
-    // 新用户：用 openId 生成唯一 family_id，确保多用户数据隔离
-    const familyId = openId ? ('family_' + openId.slice(-16)) : 'family_default'
+    let familyId
+    // 如果有邀请码,尝试查找对应的家庭
+    if (inviteCode) {
+      const familyRes = await db.collection('families').where({ invite_code: inviteCode, status: 'active' }).get()
+      if (familyRes.data && familyRes.data.length > 0) {
+        familyId = familyRes.data[0]._id
+      } else {
+        return { success: false, error: 'invalid_invite_code', message: '邀请码无效或已过期' }
+      }
+    } else {
+      // 新用户:用 openId 生成唯一 family_id,确保多用户数据隔离
+      if (openId) {
+        familyId = 'family_' + openId.slice(-16)
+      } else {
+        // 如果没有 openId(非微信登录),使用时间戳确保唯一性
+        familyId = 'family_' + Date.now()
+      }
+        
+      // 创建家庭记录并生成唯一邀请码
+      const inviteCode = await generateUniqueInviteCode(db)
+      await db.collection('families').add({
+        _id: familyId,
+        invite_code: inviteCode,
+        status: 'active',
+        created_at: Date.now(),
+      })
+    }
+    
     const newMember = {
       nickname: nickname || '用户',
       role: role || 'child',
@@ -110,7 +163,6 @@ exports.main = async (event, context) => {
     }
     const res = await db.collection('members').add(newMember)
     newMember._id = res.id
-    newMember.isNewUser = true  // 标记新用户，前端用来初始化默认数据
     member = newMember
   }
 

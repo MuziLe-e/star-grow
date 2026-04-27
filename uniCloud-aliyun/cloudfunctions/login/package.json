@@ -6,5 +6,9 @@
   "cloudfunction-config": {
     "memorySize": 256,
     "timeout": 20
+  },
+  "env": {
+    "WECHAT_APPID": "wx627a9b9f513b8a4d",
+    "WECHAT_SECRET": "0b87393f0b2332e072d1d14e0c2aa112"
   }
 }

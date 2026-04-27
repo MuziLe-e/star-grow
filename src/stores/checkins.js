@@ -14,7 +14,11 @@ export const useCheckinStore = defineStore('checkins', () => {
   async function fetchTodayCheckins(childId) {
     const today = new Date().toISOString().slice(0, 10)
     try {
-      const res = await callFunction('getCheckins', { child_id: childId, date: today })
+      const res = await callFunction('getCheckins', { 
+        child_id: childId, 
+        date: today,
+        family_id: useUserStore().familyId  // 添加 family_id 用于云端权限校验
+      })
       if (res.data) todayCheckins.value = res.data
     } catch (e) {
       // 使用本地缓存
@@ -34,6 +38,7 @@ export const useCheckinStore = defineStore('checkins', () => {
       date: today,
       feeling,
       checked_by: checkedBy,
+      family_id: userStore.familyId,  // 添加 family_id 用于云端权限校验
     }
 
     try {
@@ -97,7 +102,11 @@ export const useCheckinStore = defineStore('checkins', () => {
   async function getStreakInfo(childId) {
     try {
       const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)
-      const res = await callFunction('getCheckins', { child_id: childId, week_start: weekAgo })
+      const res = await callFunction('getCheckins', { 
+        child_id: childId, 
+        week_start: weekAgo,
+        family_id: useUserStore().familyId  // 添加 family_id 用于云端权限校验
+      })
       if (res.data) {
         weekCheckins.value = res.data
         // 简单计算：有打卡的唯一日期数
