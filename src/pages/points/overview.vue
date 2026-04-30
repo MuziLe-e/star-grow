@@ -1,7 +1,13 @@
 <!-- 积分总览 -->
 <template>
   <view class="page">
-    <view class="points-hero">
+    <view v-if="!userStore.isLoggedIn" class="guest-box">
+      <text class="guest-title">当前为游客模式</text>
+      <text class="guest-desc">登录后可查看积分和明细</text>
+      <view class="guest-btn" @click="goLogin"><text>去登录</text></view>
+    </view>
+
+    <view v-else class="points-hero">
       <text class="points-label">我的积分</text>
       <view class="points-big">
         <text class="star">⭐</text>
@@ -67,6 +73,11 @@ const weekEarned = computed(() => {
 const recentHistory = computed(() => pointsStore.history.slice(0, 10))
 
 onShow(async () => {
+  if (!userStore.isLoggedIn) {
+    pointsStore.reset()
+    streakDays.value = 0
+    return
+  }
   await pointsStore.fetchPoints(userStore.memberId)
   streakDays.value = await checkinStore.getStreakInfo(userStore.memberId)
 })
@@ -80,10 +91,32 @@ function formatTime(ts) {
 function goHistory() {
   uni.navigateTo({ url: '/pages/points/history' })
 }
+
+function goLogin() {
+  uni.navigateTo({ url: '/pages/login/index' })
+}
 </script>
 
 <style scoped>
 .page { min-height: 100vh; background: #FFF8F0; }
+.guest-box {
+  margin: 20px 16px;
+  padding: 24px 16px;
+  background: #fff;
+  border-radius: 16px;
+  text-align: center;
+}
+.guest-title { display: block; font-size: 18px; font-weight: bold; color: #333; }
+.guest-desc { display: block; margin-top: 10px; color: #999; font-size: 14px; }
+.guest-btn {
+  margin-top: 16px;
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 22px;
+  background: #FF6B6B;
+  color: #fff;
+  font-size: 14px;
+}
 .points-hero {
   text-align: center; padding: 40px 0 24px;
   background: linear-gradient(135deg, #FFE8D6, #FFF0E6); border-radius: 0 0 30px 30px;

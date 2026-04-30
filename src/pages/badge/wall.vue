@@ -1,33 +1,41 @@
 <!-- 勋章墙 -->
 <template>
   <view class="page">
-    <view class="header">
-      <text class="title">🏆 我的勋章</text>
-      <text class="count">{{ unlockedCount }}/{{ allBadges.length }}</text>
+    <view v-if="!userStore.isLoggedIn" class="guest-box">
+      <text class="guest-title">当前为游客模式</text>
+      <text class="guest-desc">登录后才可以查看勋章墙</text>
+      <view class="guest-btn" @click="goLogin"><text>去登录</text></view>
     </view>
 
-    <!-- 进度 -->
-    <view class="progress-section">
-      <view class="progress-bar">
-        <view class="progress-fill" :style="{ width: progressPercent + '%' }"></view>
+    <view v-else>
+      <view class="header">
+        <text class="title">🏆 我的勋章</text>
+        <text class="count">{{ unlockedCount }}/{{ allBadges.length }}</text>
       </view>
-      <text class="progress-text">收集进度 {{ progressPercent }}%</text>
-    </view>
 
-    <view class="badge-grid">
-      <BadgeCard
-        v-for="badge in allBadges"
-        :key="badge.badge_type"
-        :badge="badge"
-        :unlocked="isUnlocked(badge.badge_type)"
-      />
-    </view>
+      <!-- 进度 -->
+      <view class="progress-section">
+        <view class="progress-bar">
+          <view class="progress-fill" :style="{ width: progressPercent + '%' }"></view>
+        </view>
+        <text class="progress-text">收集进度 {{ progressPercent }}%</text>
+      </view>
 
-    <view class="tip" v-if="unlockedCount < allBadges.length">
-      <text>坚持打卡，解锁更多勋章！💪</text>
-    </view>
-    <view class="tip complete" v-else>
-      <text>🎉 太厉害了！你已经收集了所有勋章！</text>
+      <view class="badge-grid">
+        <BadgeCard
+          v-for="badge in allBadges"
+          :key="badge.badge_type"
+          :badge="badge"
+          :unlocked="isUnlocked(badge.badge_type)"
+        />
+      </view>
+
+      <view class="tip" v-if="unlockedCount < allBadges.length">
+        <text>坚持打卡，解锁更多勋章！💪</text>
+      </view>
+      <view class="tip complete" v-else>
+        <text>🎉 太厉害了！你已经收集了所有勋章！</text>
+      </view>
     </view>
   </view>
 </template>
@@ -56,6 +64,10 @@ function isUnlocked(type) {
 }
 
 onShow(async () => {
+  if (!userStore.isLoggedIn) {
+    myBadges.value = []
+    return
+  }
   try {
     const res = await callFunction('getBadges', { child_id: userStore.memberId })
     if (res.data) myBadges.value = res.data
@@ -63,10 +75,32 @@ onShow(async () => {
     console.error('加载勋章失败:', e)
   }
 })
+
+function goLogin() {
+  uni.navigateTo({ url: '/pages/login/index' })
+}
 </script>
 
 <style scoped>
 .page { min-height: 100vh; background: #FFF8F0; }
+.guest-box {
+  margin: 20px 16px;
+  padding: 24px 16px;
+  background: #fff;
+  border-radius: 16px;
+  text-align: center;
+}
+.guest-title { display: block; font-size: 18px; font-weight: bold; color: #333; }
+.guest-desc { display: block; margin-top: 10px; color: #999; font-size: 14px; }
+.guest-btn {
+  margin-top: 16px;
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 22px;
+  background: #FF6B6B;
+  color: #fff;
+  font-size: 14px;
+}
 .header { display: flex; justify-content: space-between; align-items: center; padding: 16px; }
 .title { font-size: 18px; font-weight: bold; }
 .count { font-size: 14px; color: #999; }

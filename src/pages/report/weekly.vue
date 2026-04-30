@@ -71,6 +71,12 @@ const weekRange = computed(() => {
 })
 
 onShow(async () => {
+  if (!userStore.isLoggedIn) {
+    stats.value = { completion_rate: 0, points_earned: 0, total_checks: 0 }
+    parentTip.value = ''
+    reflection.value = ''
+    return
+  }
   try {
     const res = await callFunction('getWeeklyReport', {
       child_id: userStore.memberId,
@@ -97,6 +103,13 @@ function getMonday() {
 }
 
 function saveReflection() {
+  if (!userStore.isLoggedIn) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    setTimeout(() => {
+      uni.navigateTo({ url: '/pages/login/index' })
+    }, 400)
+    return
+  }
   uni.setStorageSync('weekly_reflection_' + getMonday(), reflection.value)
   uni.showToast({ title: '已保存', icon: 'none' })
 }

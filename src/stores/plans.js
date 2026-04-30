@@ -10,6 +10,13 @@ export const usePlanStore = defineStore('plans', () => {
   const plans = ref(get('plans_cache') || [])
   const loading = ref(false)
 
+  // 退出登录/游客模式时清空计划，避免展示上一位用户数据
+  function reset() {
+    plans.value = []
+    loading.value = false
+    set('plans_cache', [])
+  }
+
   // 加载计划列表
   async function fetchPlans() {
     loading.value = true
@@ -68,5 +75,5 @@ export const usePlanStore = defineStore('plans', () => {
     ]
   }
 
-  return { plans, loading, fetchPlans, savePlan, archivePlan, getDefaultPlans }
+  return { plans, loading, fetchPlans, savePlan, archivePlan, getDefaultPlans, reset }
 })

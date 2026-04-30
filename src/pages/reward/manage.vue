@@ -1,94 +1,107 @@
 <!-- 奖励管理（家长端） -->
 <template>
   <view class="page">
-    <view class="header">
-      <text class="title">奖励管理</text>
-      <view class="add-btn" @click="showForm = !showForm">
-        <text>{{ showForm ? '收起' : '+ 新奖励' }}</text>
-      </view>
+    <view v-if="!userStore.isLoggedIn" class="guest-box">
+      <text class="guest-title">当前为游客模式</text>
+      <text class="guest-desc">登录后才可管理奖励</text>
+      <view class="guest-btn" @click="goLogin"><text>去登录</text></view>
     </view>
 
-    <!-- 新建表单 -->
-    <view class="form-card" v-if="showForm">
-      <view class="form-group">
-        <text class="form-label">奖励名称</text>
-        <view class="inp-wrap">
-          <input v-model="form.title" placeholder="如：看一集动画片" />
+    <view v-else-if="!userStore.isParent" class="guest-box">
+      <text class="guest-title">家长端权限</text>
+      <text class="guest-desc">请切换到家长模式后再进行管理</text>
+    </view>
+
+    <view v-else>
+      <view class="header">
+        <text class="title">奖励管理</text>
+        <view class="add-btn" @click="showForm = !showForm">
+          <text>{{ showForm ? '收起' : '+ 新奖励' }}</text>
         </view>
       </view>
-      <view class="form-group">
-        <text class="form-label">简单描述（选填）</text>
-        <view class="inp-wrap">
-          <input v-model="form.description" placeholder="奖励说明" />
-        </view>
-      </view>
-      <view class="form-row">
-        <view class="form-group flex1">
-          <text class="form-label">所需积分</text>
+
+      <!-- 新建表单 -->
+      <view class="form-card" v-if="showForm">
+        <view class="form-group">
+          <text class="form-label">奖励名称</text>
           <view class="inp-wrap">
-            <input v-model.number="form.points_cost" type="number" placeholder="30" />
+            <input v-model="form.title" placeholder="如：看一集动画片" />
           </view>
         </view>
-        <view class="form-group" style="width:90px;flex-shrink:0">
-          <text class="form-label">图标</text>
-          <view class="inp-wrap" style="text-align:center">
-            <input v-model="form.icon" placeholder="🎪" style="text-align:center" />
+        <view class="form-group">
+          <text class="form-label">简单描述（选填）</text>
+          <view class="inp-wrap">
+            <input v-model="form.description" placeholder="奖励说明" />
+          </view>
+        </view>
+        <view class="form-row">
+          <view class="form-group flex1">
+            <text class="form-label">所需积分</text>
+            <view class="inp-wrap">
+              <input v-model.number="form.points_cost" type="number" placeholder="30" />
+            </view>
+          </view>
+          <view class="form-group" style="width:90px;flex-shrink:0">
+            <text class="form-label">图标</text>
+            <view class="inp-wrap" style="text-align:center">
+              <input v-model="form.icon" placeholder="🎪" style="text-align:center" />
+            </view>
+          </view>
+        </view>
+        <view class="form-group">
+          <text class="form-label">分类</text>
+          <view class="cat-row">
+            <view class="cat" :class="{ active: form.category === 'experience' }" @click="form.category = 'experience'">体验类</view>
+            <view class="cat" :class="{ active: form.category === 'material' }" @click="form.category = 'material'">物质类</view>
+          </view>
+        </view>
+        <view class="form-group">
+          <text class="form-label">库存（-1为无限）</text>
+          <view class="inp-wrap" style="width:140px">
+            <input v-model.number="form.stock" type="number" placeholder="-1" />
+          </view>
+        </view>
+        <view class="btn-row">
+          <view class="btn-primary" @click="save"><text>{{ editingId ? '更新' : '保存' }}</text></view>
+          <view class="btn-cancel" @click="resetForm"><text>取消</text></view>
+        </view>
+      </view>
+
+      <!-- 待确认的兑换 -->
+      <view v-if="pendingExchanges.length > 0" class="section">
+        <text class="section-title">待确认兑换 ({{ pendingExchanges.length }})</text>
+        <view v-for="ex in pendingExchanges" :key="ex._id" class="exchange-item">
+          <view class="ex-left">
+            <text class="ex-icon">{{ ex.reward_icon || '🎁' }}</text>
+            <view>
+              <text class="ex-title">{{ ex.reward_title }}</text>
+              <text class="ex-cost">-{{ ex.points_spent }}⭐</text>
+            </view>
+          </view>
+          <view class="ex-actions">
+            <view class="ex-btn confirm" @click.stop="confirmExchange(ex, true)">确认</view>
+            <view class="ex-btn reject" @click.stop="confirmExchange(ex, false)">拒绝</view>
           </view>
         </view>
       </view>
-      <view class="form-group">
-        <text class="form-label">分类</text>
-        <view class="cat-row">
-          <view class="cat" :class="{ active: form.category === 'experience' }" @click="form.category = 'experience'">体验类</view>
-          <view class="cat" :class="{ active: form.category === 'material' }" @click="form.category = 'material'">物质类</view>
-        </view>
-      </view>
-      <view class="form-group">
-        <text class="form-label">库存（-1为无限）</text>
-        <view class="inp-wrap" style="width:140px">
-          <input v-model.number="form.stock" type="number" placeholder="-1" />
-        </view>
-      </view>
-      <view class="btn-row">
-        <view class="btn-primary" @click="save"><text>{{ editingId ? '更新' : '保存' }}</text></view>
-        <view class="btn-cancel" @click="resetForm"><text>取消</text></view>
-      </view>
-    </view>
 
-    <!-- 待确认的兑换 -->
-    <view v-if="pendingExchanges.length > 0" class="section">
-      <text class="section-title">待确认兑换 ({{ pendingExchanges.length }})</text>
-      <view v-for="ex in pendingExchanges" :key="ex._id" class="exchange-item">
-        <view class="ex-left">
-          <text class="ex-icon">{{ ex.reward_icon || '🎁' }}</text>
-          <view>
-            <text class="ex-title">{{ ex.reward_title }}</text>
-            <text class="ex-cost">-{{ ex.points_spent }}⭐</text>
-          </view>
+      <!-- 奖励列表 -->
+      <view v-for="r in rewards" :key="r._id" class="reward-row" @click="editReward(r)">
+        <text class="r-icon">{{ r.icon || '🎁' }}</text>
+        <view class="r-info">
+          <text class="r-title">{{ r.title }}</text>
+          <text class="r-cost">{{ r.points_cost }}⭐ · {{ r.category === 'experience' ? '体验' : '物质' }} · {{ r.stock === -1 ? '无限' : '库存' + r.stock }}</text>
+          <text class="r-desc" v-if="r.description">{{ r.description }}</text>
         </view>
-        <view class="ex-actions">
-          <view class="ex-btn confirm" @click.stop="confirmExchange(ex, true)">确认</view>
-          <view class="ex-btn reject" @click.stop="confirmExchange(ex, false)">拒绝</view>
+        <view class="r-edit" @click.stop="editReward(r)"><text>✏️</text></view>
+        <view class="r-delete" @click.stop="deleteReward(r)">
+          <text>🗑️</text>
         </view>
       </view>
-    </view>
 
-    <!-- 奖励列表 -->
-    <view v-for="r in rewards" :key="r._id" class="reward-row" @click="editReward(r)">
-      <text class="r-icon">{{ r.icon || '🎁' }}</text>
-      <view class="r-info">
-        <text class="r-title">{{ r.title }}</text>
-        <text class="r-cost">{{ r.points_cost }}⭐ · {{ r.category === 'experience' ? '体验' : '物质' }} · {{ r.stock === -1 ? '无限' : '库存' + r.stock }}</text>
-        <text class="r-desc" v-if="r.description">{{ r.description }}</text>
+      <view v-if="rewards.length === 0" class="empty">
+        <text>还没有奖励，点击上方添加</text>
       </view>
-      <view class="r-edit" @click.stop="editReward(r)"><text>✏️</text></view>
-      <view class="r-delete" @click.stop="deleteReward(r)">
-        <text>🗑️</text>
-      </view>
-    </view>
-
-    <view v-if="rewards.length === 0" class="empty">
-      <text>还没有奖励，点击上方添加</text>
     </view>
   </view>
 </template>
@@ -109,6 +122,14 @@ const editingId = ref(null)
 const form = ref({ title: '', description: '', points_cost: 30, icon: '🎁', category: 'experience', stock: -1 })
 
 onShow(async () => {
+  if (!userStore.isLoggedIn || !userStore.isParent) {
+    rewards.value = []
+    pendingExchanges.value = []
+    showForm.value = false
+    pointsStore.reset()
+    return
+  }
+
   await loadRewards()
   await loadPendingExchanges()
 })
@@ -207,10 +228,30 @@ async function confirmExchange(exchange, confirmed) {
     }
   })
 }
+
+function goLogin() { uni.navigateTo({ url: '/pages/login/index' }) }
 </script>
 
 <style scoped>
 .page { min-height: 100vh; background: #FFF8F0; }
+.guest-box {
+  margin: 20px 16px;
+  padding: 24px 16px;
+  background: #fff;
+  border-radius: 16px;
+  text-align: center;
+}
+.guest-title { display: block; font-size: 18px; font-weight: bold; color: #333; }
+.guest-desc { display: block; margin-top: 10px; color: #999; font-size: 14px; }
+.guest-btn {
+  margin-top: 16px;
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 22px;
+  background: #FF6B6B;
+  color: #fff;
+  font-size: 14px;
+}
 .header { display: flex; justify-content: space-between; align-items: center; padding: 16px; }
 .title { font-size: 18px; font-weight: bold; }
 .add-btn { background: #FF6B6B; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 14px; }

@@ -1,7 +1,7 @@
 {
   "pages": [
-    { "path": "pages/login/index", "style": { "navigationBarTitleText": "欢迎", "navigationStyle": "custom" } },
     { "path": "pages/index/index", "style": { "navigationBarTitleText": "今日打卡", "navigationStyle": "custom" } },
+    { "path": "pages/login/index", "style": { "navigationBarTitleText": "欢迎", "navigationStyle": "custom" } },
     { "path": "pages/plan/list", "style": { "navigationBarTitleText": "我的计划" } },
     { "path": "pages/plan/edit", "style": { "navigationBarTitleText": "编辑计划" } },
     { "path": "pages/points/overview", "style": { "navigationBarTitleText": "我的积分" } },

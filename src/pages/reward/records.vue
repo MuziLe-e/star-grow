@@ -1,9 +1,16 @@
 <!-- 兑换记录 -->
 <template>
   <view class="page">
-    <view class="header">
-      <text class="title">兑换记录</text>
+    <view v-if="!userStore.isLoggedIn" class="guest-box">
+      <text class="guest-title">当前为游客模式</text>
+      <text class="guest-desc">登录后可查看兑换记录</text>
+      <view class="guest-btn" @click="goLogin"><text>去登录</text></view>
     </view>
+
+    <view v-else>
+      <view class="header">
+        <text class="title">兑换记录</text>
+      </view>
 
     <!-- 家长确认区 -->
     <view v-if="userStore.isParent && pendingList.length > 0" class="pending-section">
@@ -40,7 +47,8 @@
       </view>
     </view>
 
-    <view v-if="records.length === 0" class="empty">暂无兑换记录</view>
+      <view v-if="records.length === 0" class="empty">暂无兑换记录</view>
+    </view>
   </view>
 </template>
 
@@ -59,6 +67,11 @@ const pendingList = computed(() => records.value.filter(r => r.status === 'pendi
 const doneList = computed(() => records.value.filter(r => r.status !== 'pending'))
 
 onShow(async () => {
+  if (!userStore.isLoggedIn) {
+    records.value = []
+    pointsStore.reset()
+    return
+  }
   try {
     const res = await callFunction('getExchanges', { family_id: userStore.familyId })
     if (res.data) records.value = res.data
@@ -74,6 +87,7 @@ function fmt(ts) {
 }
 
 async function handleConfirm(record, confirmed) {
+  if (!userStore.isLoggedIn) return
   await callFunction('confirmExchange', { exchange_id: record._id, confirmed })
   uni.showToast({ title: confirmed ? '已确认' : '已拒绝', icon: 'none' })
   // 拒绝时云函数会退还积分，前端从云端同步
@@ -84,10 +98,30 @@ async function handleConfirm(record, confirmed) {
   const res = await callFunction('getExchanges', { family_id: userStore.familyId })
   if (res.data) records.value = res.data
 }
+
+function goLogin() { uni.navigateTo({ url: '/pages/login/index' }) }
 </script>
 
 <style scoped>
 .page { min-height: 100vh; background: #FFF8F0; }
+.guest-box {
+  margin: 20px 16px;
+  padding: 24px 16px;
+  background: #fff;
+  border-radius: 16px;
+  text-align: center;
+}
+.guest-title { display: block; font-size: 18px; font-weight: bold; color: #333; }
+.guest-desc { display: block; margin-top: 10px; color: #999; font-size: 14px; }
+.guest-btn {
+  margin-top: 16px;
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 22px;
+  background: #FF6B6B;
+  color: #fff;
+  font-size: 14px;
+}
 .header { padding: 16px; }
 .title { font-size: 18px; font-weight: bold; }
 .pending-section { padding: 0 16px; margin-bottom: 16px; }

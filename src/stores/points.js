@@ -58,5 +58,15 @@ export const usePointsStore = defineStore('points', () => {
     await fetchPoints(memberId)
   }
 
-  return { current, total, history, fetchPoints, addPoints, deductPoints, syncFromCloud }
+  // 退出登录时清空积分状态，避免展示上一位用户数据
+  function reset() {
+    current.value = 0
+    total.value = 0
+    history.value = []
+    set('current_points', 0)
+    set('total_points', 0)
+    set('points_history', [])
+  }
+
+  return { current, total, history, fetchPoints, addPoints, deductPoints, syncFromCloud, reset }
 })

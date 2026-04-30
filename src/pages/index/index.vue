@@ -32,8 +32,15 @@
         <view class="progress-fill" :style="{ width: progressPercent + '%' }"></view>
       </view>
 
+      <!-- 游客提示 -->
+      <view v-if="!userStore.isLoggedIn" class="guest-tip">
+        <text class="empty-icon">👀</text>
+        <text class="empty-text">先体验浏览，登录后可打卡、创建计划和同步数据</text>
+        <view class="btn-primary small" @click="goLogin"><text>去登录</text></view>
+      </view>
+
       <!-- 打卡列表 -->
-      <view v-if="plans.length === 0" class="empty-tip">
+      <view v-else-if="plans.length === 0" class="empty-tip">
         <text class="empty-icon">📝</text>
         <text class="empty-text">还没有计划，快去创建吧~</text>
         <view class="btn-primary small" @click="goPlan"><text>创建计划</text></view>
@@ -100,7 +107,7 @@ const dateText = computed(() => {
 
 onShow(() => {
   if (!userStore.isLoggedIn) {
-    uni.reLaunch({ url: '/pages/login/index' })
+    offlineStore.refreshCount()
     return
   }
   loadData()
@@ -119,6 +126,7 @@ async function loadData() {
 }
 
 async function handleCheckin(plan) {
+  if (!ensureLogin('登录后才可以打卡')) return
   if (checkinStore.isChecked(plan._id)) return
   const result = await checkinStore.doCheckin(plan)
   if (result.success) {
@@ -148,6 +156,7 @@ function handleUnclick(plan) {
 }
 
 async function doSync() {
+  if (!ensureLogin('登录后才可以同步')) return
   uni.showLoading({ title: '同步中...' })
   await offlineStore.sync()
   uni.hideLoading()
@@ -157,6 +166,23 @@ async function doSync() {
 
 function goPlan() {
   uni.navigateTo({ url: '/pages/plan/edit' })
+}
+
+function goLogin() {
+  uni.navigateTo({ url: '/pages/login/index' })
+}
+
+function ensureLogin(message = '请先登录') {
+  if (userStore.isLoggedIn) return true
+  uni.showModal({
+    title: '请先登录',
+    content: message,
+    confirmText: '去登录',
+    success: (res) => {
+      if (res.confirm) goLogin()
+    }
+  })
+  return false
 }
 </script>
 
@@ -183,6 +209,7 @@ function goPlan() {
 .progress-bar { height: 8px; background: #f0f0f0; border-radius: 4px; margin-bottom: 16px; overflow: hidden; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, #FF6B6B, #FFD93D); border-radius: 4px; transition: width 0.5s; }
 .empty-tip { text-align: center; padding: 40px 0; color: #999; }
+.guest-tip { text-align: center; padding: 40px 0; color: #999; }
 .empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
 .empty-text { display: block; margin-bottom: 16px; }
 .empty-tip .btn-primary { margin-top: 8px; }

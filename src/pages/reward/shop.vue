@@ -1,6 +1,13 @@
 <!-- 奖励商店（孩子端） -->
 <template>
   <view class="page">
+    <view v-if="!userStore.isLoggedIn" class="guest-box">
+      <text class="guest-title">当前为游客模式</text>
+      <text class="guest-desc">登录后可查看奖励商店</text>
+      <view class="guest-btn" @click="goLogin"><text>去登录</text></view>
+    </view>
+
+    <view v-if="userStore.isLoggedIn" class="shop-wrap">
     <view class="shop-header">
       <view class="my-points">
         <text class="points-label">我的积分</text>
@@ -39,11 +46,12 @@
     <view class="manage-entry" @click="goRecords">
       <text>📋 兑换记录</text>
     </view>
+    </view>
   </view>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '../../stores/user.js'
 import { usePointsStore } from '../../stores/points.js'
@@ -70,8 +78,15 @@ async function loadRewards() {
   }
 }
 
-onShow(() => {
-  loadRewards()
+onShow(async () => {
+  if (!userStore.isLoggedIn) {
+    rewards.value = []
+    pointsStore.reset()
+    return
+  }
+
+  await pointsStore.fetchPoints(userStore.memberId)
+  await loadRewards()
 })
 
 async function handleExchange(reward) {
@@ -106,14 +121,34 @@ async function handleExchange(reward) {
 
 function goManage() { uni.navigateTo({ url: '/pages/reward/manage' }) }
 function goRecords() { uni.navigateTo({ url: '/pages/reward/records' }) }
+function goLogin() { uni.navigateTo({ url: '/pages/login/index' }) }
 </script>
 
 <style scoped>
 .page { min-height: 100vh; background: #FFF8F0; }
+.guest-box {
+  margin: 20px 16px;
+  padding: 24px 16px;
+  background: #fff;
+  border-radius: 16px;
+  text-align: center;
+}
+.guest-title { display: block; font-size: 18px; font-weight: bold; color: #333; }
+.guest-desc { display: block; margin-top: 10px; color: #999; font-size: 14px; }
+.guest-btn {
+  margin-top: 16px;
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 22px;
+  background: #FF6B6B;
+  color: #fff;
+  font-size: 14px;
+}
 .shop-header {
   padding: 20px 16px; background: linear-gradient(135deg, #FFE8D6, #FFF0E6);
   border-radius: 0 0 20px 20px;
 }
+.shop-wrap {}
 .points-label { font-size: 13px; color: #999; display: block; }
 .points-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
 .star { font-size: 24px; }

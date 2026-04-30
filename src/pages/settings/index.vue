@@ -10,9 +10,12 @@
       />
       <text v-else class="avatar">{{ userStore.role === 'parent' ? '👨‍👩‍👧' : '🧒' }}</text>
       <text class="nickname">{{ userStore.nickname || '未登录' }}</text>
-      <text class="role-tag">{{ userStore.role === 'parent' ? '家长' : '孩子' }}</text>
-      <view class="points-info">
+      <text class="role-tag">{{ userStore.isLoggedIn ? (userStore.role === 'parent' ? '家长' : '孩子') : '游客' }}</text>
+      <view class="points-info" v-if="userStore.isLoggedIn">
         <text class="points-text">⭐ {{ pointsStore.current }} 积分</text>
+      </view>
+      <view class="points-info" v-else>
+        <text class="points-text guest">登录后查看积分</text>
       </view>
     </view>
 
@@ -73,8 +76,12 @@
       </view>
     </view>
 
-    <view class="btn-logout" @click="handleLogout">
+    <view class="btn-logout" v-if="userStore.isLoggedIn" @click="handleLogout">
       <text>退出登录</text>
+    </view>
+
+    <view class="btn-outline" v-else @click="goLogin">
+      <text>去登录</text>
     </view>
 
     <!-- 切换家长模式 - 密码验证弹窗 -->
@@ -174,11 +181,13 @@ import { onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '../../stores/user.js'
 import { usePointsStore } from '../../stores/points.js'
 import { useOfflineStore } from '../../stores/offline.js'
+import { usePlanStore } from '../../stores/plans.js'
 import { callFunction } from '../../utils/api.js'
 
 const userStore = useUserStore()
 const pointsStore = usePointsStore()
 const offlineStore = useOfflineStore()
+const planStore = usePlanStore()
 
 const showPasswordInput = ref(false)
 const passwordValue = ref('')
@@ -286,16 +295,26 @@ function handleLogout() {
     content: '退出后数据仍会保留',
     success: (res) => {
       if (res.confirm) {
+        pointsStore.reset()
+        planStore.reset()
         userStore.logout()
-        uni.reLaunch({ url: '/pages/login/index' })
+        uni.switchTab({ url: '/pages/index/index' })
       }
     }
   })
 }
 
+function goLogin() {
+  uni.navigateTo({ url: '/pages/login/index' })
+}
+
 async function showInviteCode() {
   console.log('=== 开始获取邀请码 ===')
   console.log('当前 familyId:', userStore.familyId)
+  if (!userStore.isLoggedIn || !userStore.isParent) {
+    uni.showToast({ title: '请先登录家长账号', icon: 'none' })
+    return
+  }
   
   if (!userStore.familyId) {
     uni.showToast({ title: '未找到家庭信息，请重新登录', icon: 'none' })
@@ -352,6 +371,7 @@ function copyInviteCode() {
 }
 .points-info { margin-top: 10px; }
 .points-text { font-size: 15px; color: #E67E22; font-weight: bold; }
+.points-text.guest { color: #999; font-weight: normal; }
 .sync-bar {
   display: flex; justify-content: space-between; align-items: center;
   margin: 12px 16px; padding: 12px 16px;

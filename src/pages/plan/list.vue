@@ -1,6 +1,13 @@
 <!-- 计划列表 -->
 <template>
   <view class="page">
+    <view v-if="!userStore.isLoggedIn" class="guest-box">
+      <text class="guest-title">当前为游客模式</text>
+      <text class="guest-desc">登录后才可以查看和管理计划</text>
+      <view class="guest-btn" @click="goLogin"><text>去登录</text></view>
+    </view>
+
+    <view v-else>
     <view class="header">
       <text class="title">我的计划</text>
       <view class="add-btn" @click="goAdd"><text>+ 新建</text></view>
@@ -40,6 +47,7 @@
         </view>
       </view>
     </view>
+    </view>
   </view>
 </template>
 
@@ -47,8 +55,10 @@
 import { ref, computed } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { usePlanStore } from '../../stores/plans.js'
+import { useUserStore } from '../../stores/user.js'
 
 const planStore = usePlanStore()
+const userStore = useUserStore()
 const showModal = ref(false)
 const selectedPlan = ref(null)
 const activePlans = computed(() => planStore.plans.filter(p => p.status !== 'archived'))
@@ -56,6 +66,10 @@ const activePlans = computed(() => planStore.plans.filter(p => p.status !== 'arc
 const catIcon = (c) => ({ reading:'📚', study:'📝', exercise:'🏃', life:'🏠', custom:'🎯' })[c] || '🎯'
 
 onShow(() => {
+  if (!userStore.isLoggedIn) {
+    planStore.reset()
+    return
+  }
   planStore.fetchPlans()
 })
 
@@ -74,6 +88,10 @@ function goEdit(plan) {
 async function deletePlan() {
   showModal.value = false
   if (!selectedPlan.value) return
+  if (!userStore.isLoggedIn) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    return
+  }
 
   uni.showModal({
     title: '确认删除',
@@ -92,10 +110,32 @@ async function deletePlan() {
     }
   })
 }
+
+function goLogin() {
+  uni.navigateTo({ url: '/pages/login/index' })
+}
 </script>
 
 <style scoped>
 .page { min-height: 100vh; background: #FFF8F0; }
+.guest-box {
+  margin: 20px 16px;
+  padding: 24px 16px;
+  background: #fff;
+  border-radius: 16px;
+  text-align: center;
+}
+.guest-title { display: block; font-size: 18px; font-weight: bold; color: #333; }
+.guest-desc { display: block; margin-top: 10px; color: #999; font-size: 14px; }
+.guest-btn {
+  margin-top: 16px;
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 22px;
+  background: #FF6B6B;
+  color: #fff;
+  font-size: 14px;
+}
 .header { display: flex; justify-content: space-between; align-items: center; padding: 16px; }
 .title { font-size: 18px; font-weight: bold; }
 .add-btn { background: #FF6B6B; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 14px; }
